@@ -64,7 +64,7 @@ class CreateSSPDataStorageOperator(bpy.types.Operator):
         self.add_custom_property(store, "song_beat_id", 1, 1, 4)
         self.add_custom_property(store, "song_bpm", 95, 30, 300)
         self.add_custom_property(store, "song_impulse", 1.0, 0, 1)
-        self.add_custom_property(store, "song_length_seconds", 1)
+        self.add_custom_property(store, "song_length_seconds", 3*60)
         for i in range(16):
             if i < 10:
                 str_num = "0" + str(i)

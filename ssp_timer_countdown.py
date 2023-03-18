@@ -1,4 +1,7 @@
 import bpy
+import re
+ 
+# from .ssp_object_navigator import ObjectNavigator
 
 #in order to make a button do custom behavior we need to register and make an operator, a basic
 #custom operator that does not take any property and just runs is easily made like so        
@@ -293,55 +296,21 @@ class CreateTimerCountdownOperator(bpy.types.Operator):
         time_countdown.links.new(group_input.outputs[2], set_material.inputs[2])
         return time_countdown
 
-    def setup_driver(self, targetObj):
-        # Get a reference to the object with the custom property
-        obj = bpy.data.objects.get("SONIC_SOUND_PICTURE_DATA_STORAGE")
-        if obj is None:
-            print("Error: Object 'SONIC_SOUND_PICTURE_DATA_STORAGE' not found.")
-            quit()
+    def add_driver(self, target, source, prop, dataPath, driverType = 'AVERAGE', func = ''):
+        d = target.driver_add( prop ).driver
+        d.type = driverType
+        d.expression = func 
+        v = d.variables.new()
+        v.name                 = prop
+        v.targets[0].id        = source
+        v.targets[0].data_path = dataPath
 
-        # Check if the custom property exists on the object
-        if "song_length_seconds" not in obj.keys():
-            print("Error: Custom property 'song_length_seconds' not found on object.")
-            quit()
-
-        # Get the value of the custom property
-        song_length = obj["song_length_seconds"]
-
-        # Create a new driver for a property called "my_custom_property"
-        driver = bpy.data.objects.new("DriverObject", None)
-
-        # Create a driver for the new custom property
-
-
-       
-        # Get a reference to the Time Countdown modifier and set its second input to the new driver
-        modifier = targetObj.modifiers.get("Time Countdown")
-        if modifier is None:
-            print("Error: Modifier 'Time Countdown' not found on object.")
-            quit()
-
-        # Create a new variable to hold the data path for the custom property
-        data_path = "['DriverObject']['my_custom_property']"
-
-        # Add the driver to the scene, using the data path to reference the custom property
-        # modifier.driver_add("Input_2")
-        modifier.driver[1].type = 'SCRIPTED'
-        modifier.driver[1].expression = data_path
-
-        # Set the variable in the driver namespace to the custom property value
-        modifier.driver.variables.new()
-        modifier.driver.variables[0].name = "my_custom_property"
-        modifier.driver.variables[0].type = 'SINGLE_PROP'
-        modifier.driver.variables[0].targets[0].id_type = 'OBJECT'
-        modifier.driver.variables[0].targets[0].id = driver
-        modifier.driver.variables[0].targets[0].data_path = "['my_custom_property']"
-        modifier.driver.variables[0].targets[0].data_path_update(data_path)
-
-        # Add the driver object to the scene
-        bpy.context.scene.collection.objects.link(driver)
-
-
+        
+    def setup_driver(self):
+        target_object = bpy.data.objects["Countdown Timer"].modifiers["Time Countdown"]
+        source_object = bpy.data.objects["SONIC_SOUND_PICTURE_DATA_STORAGE"]
+        expr = "song_length_seconds"
+        self.add_driver( target = target_object, source=source_object, prop='["Input_2"]', dataPath= '["song_length_seconds"]', func=expr )    
 
     def execute(self, context):
 		#initialize time_countdown node group
@@ -361,9 +330,9 @@ class CreateTimerCountdownOperator(bpy.types.Operator):
         mod = obj.modifiers.new(name = "Time Countdown", type = 'NODES')
         mod.node_group = time_countdown
 
-        # TODO: FIXME => self.setup_driver(obj)
+        self.setup_driver()
         
-        self.report({ 'INFO' }, 'TODO: Adjust Material. Add COPY SONIC_SOUND_PICTURE_DATA_STORAGE.song_length_seconds to "Countdown Timer".TotalSeconds')
+        self.report({ 'INFO' }, 'TODO: Adjust Material and Fix String join order in "Countdown Timer"s geometry node.')
         return {'FINISHED'}
     
 def register():
