@@ -2,8 +2,8 @@ import bpy
 import os
 from bpy_extras.io_utils import ImportHelper
   
-class TemplateSettings(bpy.types.Panel):
-    bl_parent_id = "CustomToolShelf"
+class SSP_PT_TemplateSettings(bpy.types.Panel):
+    bl_parent_id = "SSP_PT_CustomToolShelf"
     bl_label = "template.json"
     bl_category = "Example tab"
     bl_space_type = "VIEW_3D"
@@ -52,7 +52,7 @@ class TemplateSettings(bpy.types.Panel):
 
         
 #create a panel (class) by deriving from the bpy Panel, this be the UI
-class CustomToolShelf(bpy.types.Panel):
+class SSP_PT_CustomToolShelf(bpy.types.Panel):
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
     bl_label = 'Sonic Sound Picture'
@@ -66,7 +66,7 @@ class CustomToolShelf(bpy.types.Panel):
         layout.operator('custom.ssp_create_countdown_timer', text = 'Create Countdown Timer')
         
         
-classes = (CustomToolShelf, TemplateSettings)
+classes = (SSP_PT_CustomToolShelf, SSP_PT_TemplateSettings)
 
 
 def register():

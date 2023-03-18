@@ -1,8 +1,6 @@
 import bpy
 import re
  
-# from .ssp_object_navigator import ObjectNavigator
-
 #in order to make a button do custom behavior we need to register and make an operator, a basic
 #custom operator that does not take any property and just runs is easily made like so        
 class CreateTimerCountdownOperator(bpy.types.Operator):
@@ -297,7 +295,7 @@ class CreateTimerCountdownOperator(bpy.types.Operator):
         return time_countdown
 
     def add_driver(self, target, source, prop, dataPath, driverType = 'AVERAGE', func = ''):
-        d = target.driver_add( prop ).driver
+        d = target.driver_add( '["' + prop + '"]' ).driver
         d.type = driverType
         d.expression = func 
         v = d.variables.new()
@@ -310,7 +308,7 @@ class CreateTimerCountdownOperator(bpy.types.Operator):
         target_object = bpy.data.objects["Countdown Timer"].modifiers["Time Countdown"]
         source_object = bpy.data.objects["SONIC_SOUND_PICTURE_DATA_STORAGE"]
         expr = "song_length_seconds"
-        self.add_driver( target = target_object, source=source_object, prop='["Input_2"]', dataPath= '["song_length_seconds"]', func=expr )    
+        self.add_driver( target = target_object, source=source_object, prop='Input_2', dataPath= '["song_length_seconds"]', func=expr )    
 
     def execute(self, context):
 		#initialize time_countdown node group
