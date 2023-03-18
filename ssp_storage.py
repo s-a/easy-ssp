@@ -72,15 +72,6 @@ class CreateSSPDataStorageOperator(bpy.types.Operator):
                 str_num = str(i)
             self.add_custom_property(store, "song_frequency_band_" + str_num, 1.0, 0.0, 1.0)
 
-        
-        #just do the logic here
-        #        bpy.types.Scene.custom_props
-        context.scene.custom_props.string_field = "xxxx"
-        #this is a report, it pops up in the area defined in the word
-        #in curly braces {} which is the first argument, second is the actual displayed text
-        # self.report({'INFO'}, "done" )
-        #return value tells blender wether the operation finished sueccessfully
-        #needs to be in curly braces also {}
         return {'FINISHED'}
     
 def register():

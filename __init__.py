@@ -21,6 +21,10 @@ modulesNames = [
     'ssp_storage', 
     'ssp_timer_countdown', 
     'ssp_props', 
+    'ssp_load', 
+    'ssp_save', 
+    'ssp_parm_delete', 
+    'ssp_parm_save', 
     'ssp_gui'
 ]
  
