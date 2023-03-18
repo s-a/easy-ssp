@@ -70,11 +70,9 @@ classes = (CustomToolShelf, TemplateSettings)
 
 
 def register():
-   bpy.utils.register_class(ImportSomeData)
    for cls in classes:
         bpy.utils.register_class(cls)
 
 def unregister():
-    bpy.utils.unregister_class(ImportSomeData)
     for cls in classes:
         bpy.utils.unregister_class(cls)
