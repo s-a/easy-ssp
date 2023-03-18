@@ -5,7 +5,7 @@ import sys
 bl_info = {
     "name": "easy-ssp",
     "author": "s-a",
-    "version": (1, 0),
+    "version": (1, 1),
     "blender": (3, 4, 1),
     "description": "Utility addon to create Sonic Sound Picture (SSP) templates",
     "location": "View3D > Sidebar > View",
