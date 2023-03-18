@@ -57,7 +57,7 @@ class CustomToolShelf(bpy.types.Panel):
     bl_region_type = 'UI'
     bl_label = 'Sonic Sound Picture'
     bl_context = 'objectmode'
-    bl_category = 'View'
+    bl_category = 'Tool'
     
     def draw(self, context):
         layout = self.layout

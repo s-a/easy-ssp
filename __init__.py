@@ -8,7 +8,7 @@ bl_info = {
     "version": (1, 1),
     "blender": (3, 4, 1),
     "description": "Utility addon to create Sonic Sound Picture (SSP) templates",
-    "location": "View3D > Sidebar > View",
+    "location": "View3D > Sidebar > Tool > Sonic Sound Picture",
     "category": "Object",
     "support": "COMMUNITY",
     "wiki_url": "https://github.com/s-a/easy-ssp/blob/main/README.md",
