@@ -2,6 +2,18 @@ import bpy
 import re
 
 class ObjectNavigator:
+	def dump(self, obj, text):
+		print('-'*40, text, '-'*40)
+		for attr in dir(obj):
+			if hasattr(obj, attr):
+				value = getattr(obj, attr)
+				if isinstance(value, bpy.types.Property):
+					print("obj.%s = %s" % (attr, value))
+					# print("  Data path: %s" % value.path())
+				else:
+					print("obj.%s = %s" % (attr, value))
+		# print("Full path: ", bpy.path.abspath(obj.bl_rna.filepath))
+
 	def add_driver(self, target, source, prop, dataPath, driverType = 'AVERAGE', func = ''):
 		d = target.driver_add( '["' + prop + '"]' ).driver
 		d.type = driverType

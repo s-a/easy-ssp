@@ -1,23 +1,11 @@
 import bpy
-from bpy.types import Header, Menu, Panel
+import math
 from .ssp_object_navigator import ObjectNavigator
-
-def dump(obj, text):
-    print('-'*40, text, '-'*40)
-    for attr in dir(obj):
-        if hasattr(obj, attr):
-            value = getattr(obj, attr)
-            if isinstance(value, bpy.types.Property):
-                print("obj.%s = %s" % (attr, value))
-                # print("  Data path: %s" % value.path())
-            else:
-                print("obj.%s = %s" % (attr, value))
-    # print("Full path: ", bpy.path.abspath(obj.bl_rna.filepath))
  
 class CopyAndSetupDriver(bpy.types.Operator):
     """Tooltip"""
     bl_idname = "object.copy_and_setup_driver"
-    bl_label = "Create SSP GUI User Input Parameter"
+    bl_label = "Copy and setup SSP driver"
 
     source: bpy.props.StringProperty()
     @classmethod
@@ -63,9 +51,107 @@ class CopyAndSetupDriver(bpy.types.Operator):
    
         return {'FINISHED'}
 
+ 
+class AddGUIParameter(bpy.types.Operator):
+    """Tooltip"""
+    bl_idname = "object.copy_and_setup_driver"
+    bl_label = "Create SSP GUI User Input Parameter"
+ 
+    @classmethod
+    def poll(cls, context):
+        return "SONIC_SOUND_PICTURE_DATA_STORAGE" in bpy.data.objects
+
+
+    def srgb_to_linearrgb(self, c):
+        if c < 0:
+            return 0
+        elif c < 0.04045:
+            return c / 12.92
+        else:
+            return ((c + 0.055) / 1.055) ** 2.4
+
+    def linearrgb_to_srgb(self, c):
+        if c < 0:
+            return 0
+        elif c > 1:
+            return 1
+        elif c < 0.0031308:
+            return 12.92 * c
+        else:
+            return 1.055 * c ** (1/2.4) - 0.055
+
+    def node_socket_color_to_hex_string(self, color):
+        """
+        Converts a NodeSocketColor object to a hexadecimal color string.
+
+        Parameters:
+            color (bpy.types.NodeSocketColor): The color to convert.
+
+        Returns:
+            A string representing the color in hexadecimal format with a leading hash tag.
+        """
+        # Convert the color components from sRGB to linear RGB
+        r_lin = self.srgb_to_linearrgb(color[0])
+        g_lin = self.srgb_to_linearrgb(color[1])
+        b_lin = self.srgb_to_linearrgb(color[2])
+
+        # Convert the linear RGB components to sRGB
+        r_srgb = self.linearrgb_to_srgb(r_lin)
+        g_srgb = self.linearrgb_to_srgb(g_lin)
+        b_srgb = self.linearrgb_to_srgb(b_lin)
+
+        # Convert the sRGB components from float to integer values
+        r = int(r_srgb * 255)
+        g = int(g_srgb * 255)
+        b = int(b_srgb * 255)
+
+        # Format the color components as a hexadecimal string
+        hex_string = '{:02X}{:02X}{:02X}'.format(r, g, b)
+
+        # Ensure the hex string has a length of 6 with a leading hash tag
+        hex_string = '#' + hex_string.zfill(6)
+
+        return hex_string
+
+         
+    
+    def execute(self, context):
+        # get the data path
+        bpy.ops.ui.copy_data_path_button()
+        path = context.window_manager.clipboard
+
+        # get full data path
+        bpy.ops.ui.copy_data_path_button(full_path=True)
+        full_path = context.window_manager.clipboard
+         
+        nav = ObjectNavigator()
+        # print (path)
+        value = nav.get_object(full_path)
+
+        context.scene.sonic_sound_picture_props.current_parm_title = ""
+        context.scene.sonic_sound_picture_props.current_parm_accept = ""
+        if isinstance(value, bpy.types.bpy_prop_array) and len(value) == 4:
+            context.scene.sonic_sound_picture_props.current_parm_type = 'color'
+            value = self.node_socket_color_to_hex_string(value)
+        else:
+            value = str(value)
+            context.scene.sonic_sound_picture_props.current_parm_type = 'text'
+
+        context.scene.sonic_sound_picture_props.current_parm_value = value
+        context.scene.sonic_sound_picture_props.current_parm_path = full_path
+        # if hasattr(context, 'button_pointer'):
+        #    path, level, level_type = nav.split_string(full_path)
+        #    btn = context.button_pointer 
+        #    nav.dump(btn, '________________________________________')
+        #    context.scene.sonic_sound_picture_props.current_parm_title = btn.name + ' ' + path + level
+        
+        self.report({"INFO"}, "Parameter prepared. Adjust and save! " + full_path)
+   
+        return {'FINISHED'}
+
 # This class has to be exactly named like that to insert an entry in the right click menu
-class WM_MT_button_context(Menu):
-    bl_label = "Add Viddyoze Tag"
+class WM_MT_button_context(bpy.types.Menu):
+    bl_label = "SSP"
 
     def draw(self, context):
         pass
@@ -123,7 +209,6 @@ class SSP_CUSTOM_MT_SubMenu(bpy.types.Menu):
         # just for fun call the first one again
         layout.menu(SSP_CUSTOM_MT_SubSubMenu.__name__, icon="COLLAPSEMENU")
 
-
 class SSP_CUSTOM_MT_SubSubMenu(bpy.types.Menu):
     bl_label = "Sub Sub Menu"
     bl_idname = "SSP_CUSTOM_MT_SubSubMenu" # Optional
@@ -136,7 +221,7 @@ def menu_func(self, context):
     layout = self.layout
     layout.separator()
     layout.label(text="Sonic Sound Picture", icon='SOUND')
-    layout.operator(CopyAndSetupDriver.bl_idname)
+    layout.operator(AddGUIParameter.bl_idname)
     layout.operator("wm.call_menu", text="Connect SSP Automation Driver").name = SSP_CUSTOM_MT_Menu.__name__
  
  
@@ -146,6 +231,7 @@ classes = (
     SSP_CUSTOM_MT_SubMenu,
     SSP_CUSTOM_MT_SubSubMenu,
     CopyAndSetupDriver,
+    AddGUIParameter,
     WM_MT_button_context,
 )
 
@@ -157,4 +243,3 @@ def register():
 def unregister():
     for cls in classes:
         bpy.utils.unregister_class(cls)
-    bpy.types.WM_MT_button_context.remove(menu_func)
