@@ -22,7 +22,7 @@ class CopyAndSetupDriver(bpy.types.Operator):
     source: bpy.props.StringProperty()
     @classmethod
     def poll(cls, context):
-        return context.active_object is not None
+        return "SONIC_SOUND_PICTURE_DATA_STORAGE" in bpy.data.objects
 
     def setup_driver(self, full_data_path_target):
         nav = ObjectNavigator()
