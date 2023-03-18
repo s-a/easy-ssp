@@ -11,10 +11,10 @@ bl_info = {
     "location": "View3D > Sidebar > View",
     "category": "Object",
     "support": "COMMUNITY",
-    "wiki_url": "https://github.com/your-username/your-addon/wiki",
-    "tracker_url": "https://github.com/your-username/your-addon/issues",
+    "wiki_url": "https://github.com/s-a/easy-ssp/blob/main/README.md",
+    "tracker_url": "https://github.com/s-a/easy-ssp/issues",
     "warning": "",
-    "doc": ""
+    "doc": "https://github.com/s-a/easy-ssp/blob/main/README.md"
 }
   
 modulesNames = [
