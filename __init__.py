@@ -23,6 +23,7 @@ modulesNames = [
     'ssp_props', 
     'ssp_load', 
     'ssp_save', 
+    'ssp_save_thumbnail', 
     'ssp_parm_delete', 
     'ssp_parm_save', 
     'ssp_gui',

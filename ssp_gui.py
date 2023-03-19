@@ -63,8 +63,9 @@ class SSP_PT_CustomToolShelf(bpy.types.Panel):
         layout = self.layout
         
         layout.operator('custom.ssp_create_store', text = 'Create Storage')
+        layout.operator('custom.ssp_save_thumbnail', text = 'Write Thumbnail')
+        layout.separator()
         layout.operator('custom.ssp_create_countdown_timer', text = 'Create Countdown Timer')
-        
         
 classes = (SSP_PT_CustomToolShelf, SSP_PT_TemplateSettings)
 
