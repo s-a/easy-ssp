@@ -209,7 +209,7 @@ class WM_MT_button_context(bpy.types.Menu):
         pass
 
 class SSP_CUSTOM_MT_Menu(bpy.types.Menu):
-    bl_label = "First Menu"
+    bl_label = "Sonic Sound Picture"
     bl_idname = "SSP_CUSTOM_MT_Menu"
 
     @classmethod
