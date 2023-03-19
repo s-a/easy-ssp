@@ -16,12 +16,14 @@ class ObjectNavigator:
 
 	def add_driver(self, target, source, prop, dataPath, driverType = 'AVERAGE', func = ''):
 		d = target.driver_add( '["' + prop + '"]' ).driver
+		
 		d.type = driverType
 		d.expression = func 
 		v = d.variables.new()
 		v.name                 = prop
 		v.targets[0].id        = source
 		v.targets[0].data_path = dataPath
+	
 	def get_object(self, key):
 		# Use a regular expression to split the key on the period character, except when it's inside square brackets
 		parts = re.split(r'(?<!\[)\.(?![^\[]*\])', key)

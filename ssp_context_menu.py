@@ -1,29 +1,80 @@
 import bpy
 import math
+import re
 from .ssp_object_navigator import ObjectNavigator
  
 class CopyAndSetupDriver(bpy.types.Operator):
-    """Tooltip"""
+    """Copy Driver From Automation Storage"""
     bl_idname = "object.copy_and_setup_driver"
     bl_label = "Copy and setup SSP driver"
 
     source: bpy.props.StringProperty()
+   
     @classmethod
     def poll(cls, context):
         return "SONIC_SOUND_PICTURE_DATA_STORAGE" in bpy.data.objects
 
-    def setup_driver(self, full_data_path_target):
+    def add_driver(self, level, target, source, prop, dataPath, driverType = 'AVERAGE', func = '', child_prop = None):
+        
+        if "[" in prop:
+            print ("COMPLEX ADD_DRIVER", level, prop, dataPath)
+            parts = prop.split('[')
+            parts[1] = int(parts[1].replace("]", ""))
+            print ("COMPLEX ADD_DRIVER ------------------", parts)
+            print('<---------------------', prop)
+            d = target.driver_add( parts[0], parts[1] ).driver
+            prop = parts[0]
+        else:
+            print ("SIMPLE ADD_DRIVER", prop)
+            d = target.driver_add( prop ).driver
+        
+        d.type = driverType
+        d.expression = func 
+        v = d.variables.new()
+        v.name                 = prop
+        v.targets[0].id        = source
+        v.targets[0].data_path = dataPath
+
+    def setup_driver(self, full_data_path_target, prop = None):
         nav = ObjectNavigator()
 
         path, level, level_type = nav.split_string(full_data_path_target)
         print ("target: ", path, level, level_type)
         print ("source: ", self.source)
-        #nav.get_object()
-        target_object = nav.get_object(path)
+        
+        if (prop == None):
+            prop = level
+
+        target_object = nav.get_object(full_data_path_target)
         source_object = bpy.data.objects["SONIC_SOUND_PICTURE_DATA_STORAGE"]
         expr = self.source
-        nav.add_driver( target = target_object, source=source_object, prop= level, dataPath= '["' + self.source + '"]', func=expr )    
+        cmd = '["SONIC_SOUND_PICTURE_DATA_STORAGE"].' + str(self.source) + " -> " + full_data_path_target + '.' + prop
+        print ('Try ' + cmd)
+        self.add_driver(level=level, target = target_object, source=source_object, prop= prop, dataPath= '["' + self.source + '"]', func=expr )    
+        self.report({"INFO"}, 'Driver added! ' + cmd)
 
+        """     
+                if hasattr(context, 'button_pointer'):
+                    btn = context.button_pointer 
+                    dump(btn, 'button_pointer')
+                
+
+                if hasattr(context, 'button_prop'):
+                    prop = context.button_prop
+
+                if hasattr(context, 'button_operator'):
+                    op = context.button_operator
+            """
+    def extract_parent_child(self, path):
+
+        parts = re.split(r'(?<!\[)\.(?![^\[]*\])', path)
+        print ("FULL DATA PATH", parts)
+
+        parent_str = ".".join(parts[:-1])
+        child_str = parts[-1]
+
+        return parent_str, child_str
+    
     def execute(self, context):
         # get the data path
         bpy.ops.ui.copy_data_path_button()
@@ -33,28 +84,29 @@ class CopyAndSetupDriver(bpy.types.Operator):
         bpy.ops.ui.copy_data_path_button(full_path=True)
         full_path = context.window_manager.clipboard
         
-        """     
-            if hasattr(context, 'button_pointer'):
-                btn = context.button_pointer 
-                dump(btn, 'button_pointer')
-            
-
-            if hasattr(context, 'button_prop'):
-                prop = context.button_prop
-
-            if hasattr(context, 'button_operator'):
-                op = context.button_operator
-        """
-        # print (path)
-        self.setup_driver(full_path)
-        self.report({"INFO"}, "Driver added! " + str(self.source) + " - " + full_path)
+        print ("__________________________________________________")
+        nav = ObjectNavigator()
+        obj = nav.get_object(full_path)
+        if hasattr(obj, 'driver_add') and callable(getattr(obj, 'driver_add')):
+            print("The '" + full_path + "' has a method called driver_add")
+            self.setup_driver(full_path)
+        else:
+            print("The'" + full_path + "' does NOT have a method called driver_add... try parent")
+            parent, child = self.extract_parent_child(full_path)
+            print(parent, child)
+            obj = nav.get_object(parent)
+            if hasattr(obj, 'driver_add') and callable(getattr(obj, 'driver_add')):
+                print("The '" + parent + "' has a method called driver_add")
+                self.setup_driver(parent, child)
+            else:
+                print("The '" + parent + "' does NOT have a method called driver_add")
+                self.report({"WARNING"}, 'Sowwy..., driver NOT added! Please do manual via "Copy As New Driver" and "Paste Driver"')
    
         return {'FINISHED'}
 
- 
 class AddGUIParameter(bpy.types.Operator):
     """Tooltip"""
-    bl_idname = "object.copy_and_setup_driver"
+    bl_idname = "object.add_ssp_gui_user_input_parameter"
     bl_label = "Create SSP GUI User Input Parameter"
  
     @classmethod
@@ -160,25 +212,29 @@ class SSP_CUSTOM_MT_Menu(bpy.types.Menu):
     bl_label = "First Menu"
     bl_idname = "SSP_CUSTOM_MT_Menu"
 
+    @classmethod
+    def poll(cls, context):
+        return "SONIC_SOUND_PICTURE_DATA_STORAGE" in bpy.data.objects
+
     def draw(self, context):
         layout = self.layout
         layout.label(text="Connect SSP Automation Driver", icon='SOUND')
       
-        op1 = layout.operator(operator = CopyAndSetupDriver.bl_idname, text="song_beat_id")
-        op1.source = "song_beat_id"
-        op1 = layout.operator(operator = CopyAndSetupDriver.bl_idname, text="song_bpm")
-        op1.source = "song_bpm"
-        op1 = layout.operator(operator = CopyAndSetupDriver.bl_idname, text="song_impulse")
-        op1.source = "song_impulse"
-        op1 = layout.operator(operator = CopyAndSetupDriver.bl_idname, text="song_length_seconds")
-        op1.source = "song_length_seconds"
+        op = layout.operator(operator = CopyAndSetupDriver.bl_idname, text="song_beat_id")
+        op.source = "song_beat_id"
+        op = layout.operator(operator = CopyAndSetupDriver.bl_idname, text="song_bpm")
+        op.source = "song_bpm"
+        op = layout.operator(operator = CopyAndSetupDriver.bl_idname, text="song_impulse")
+        op.source = "song_impulse"
+        op = layout.operator(operator = CopyAndSetupDriver.bl_idname, text="song_length_seconds")
+        op.source = "song_length_seconds"
         for i in range(16):
             if i < 10:
                 str_num = "0" + str(i)
             else:
                 str_num = str(i)
-            op1 = layout.operator(operator = CopyAndSetupDriver.bl_idname, text="song_frequency_band_" + str_num)
-            op1.source = "song_frequency_band_" + str_num
+            op = layout.operator(operator = CopyAndSetupDriver.bl_idname, text="song_frequency_band_" + str_num)
+            op.source = "song_frequency_band_" + str_num
       
         # call the second custom menu using bl_idname attribute
         """ layout.menu(SSP_CUSTOM_MT_SubMenu.bl_idname, icon="COLLAPSEMENU")
