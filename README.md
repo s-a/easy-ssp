@@ -4,9 +4,11 @@ If you're looking to create stunning and immersive audio visualizations, [Sonic 
 
 [Easy SSP](https://github.com/s-a/easy-ssp/releases) includes a range of tools and utilities that will help you get started with [SSP](https://github.com/s-a/sonic-sound-picture) templates in no time. From setting up the correct project settings to custom shapes and animations, "easy-ssp" has got you covered 🙃.
 
-## Real World Showcase on YouTube (Click the image)
+## Real World Showcases on YouTube (Click the image)
 
 [![Sonic Sound Picture (SSP) Real World Showcase on YouTube](https://img.youtube.com/vi/CkwoATMSfSs/maxresdefault.jpg)](https://www.youtube.com/watch?v=CkwoATMSfSs)
+
+[![Sonic Sound Picture (SSP) Real World Showcase on YouTube](https://img.youtube.com/vi/_LXRN8dULM4/maxresdefault.jpg)](https://www.youtube.com/watch?v=_LXRN8dULM4)
 
 
 ## Usage
