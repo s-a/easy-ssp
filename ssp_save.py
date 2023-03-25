@@ -21,6 +21,7 @@ class SaveSSPDataStorageOperator(bpy.types.Operator):
 			"allowTransparent": context.scene.sonic_sound_picture_props.allowTransparent,
 			"description": context.scene.sonic_sound_picture_props.description,
 			"license": context.scene.sonic_sound_picture_props.license,
+			"url": context.scene.sonic_sound_picture_props.url,
 			"parms": []
 		}
 		if (os.path.exists(fn)):
